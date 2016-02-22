@@ -1,0 +1,2 @@
+installer:
+	pynsist installer.cfg
