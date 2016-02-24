@@ -1,0 +1,1 @@
+"""Contains task of general purposes"""
