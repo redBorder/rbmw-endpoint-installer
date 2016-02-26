@@ -42,7 +42,7 @@ RequestExecutionLevel admin
 [% block ui_pages %]
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_COMPONENTS
-!insertmacro MUI_PAGE_DIRECTORY
+; !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_PAGE_FINISH
 [% endblock ui_pages %]
@@ -85,28 +85,15 @@ Section /o "GRR Client" sec_grr
   ExecWait "$INSTDIR\grr\GRR_3.0.0.7_amd64.exe"
 SectionEnd
 
-; Install certificates
-Section /o "redBorder root certificate" sec_cert
-  Push "$INSTDIR\certs\s3.redborder.cluster.crt"
-  Call AddCertificateToStore
-  Pop $0
-  ${If} $0 != success
-  MessageBox MB_OK "import failed: $0"
-  ${EndIf}
-SectionEnd
+; ; Install endpoint_agent as a service
+; Section "Install as a services" sec_service
+;   nsExec::Exec "cmd"
+; SectionEnd
 
-; Add entries to host
-Section /o "Add entries to hosts files" sec_host
-  ${FileJoin} "$SYSDIR\drivers\etc\hosts" "$INSTDIR\hosts" "$SYSDIR\drivers\etc\hosts"
-SectionEnd
+SectionGroup "Loader agent" index_output
 
-; Install endpoint_agent as a service
-Section "Install as a services" sec_service
-  nsExec::Exec "cmd"
-SectionEnd
-
-; Install endpoint_agent
-Section "Loader Agent" sec_app
+; Install endpoint_agent core
+Section "Agent core" sec_app
   SectionIn RO
   SetShellVarContext all
   File ${PRODUCT_ICON}
@@ -147,6 +134,8 @@ Section "Loader Agent" sec_app
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" \
                    "NoRepair" 1
 
+  ExecWait "$INSTDIR\postinstall.bat"
+
   ; Check if we need to reboot
   IfRebootFlag 0 noreboot
     MessageBox MB_YESNO "A reboot is required to finish the installation. Do you wish to reboot now?" \
@@ -154,6 +143,32 @@ Section "Loader Agent" sec_app
       Reboot
   noreboot:
 SectionEnd
+
+; Install dependences
+Section "Python dependences" sec_pysha
+  SectionIn RO
+
+  ExecWait "$INSTDIR\deps\x86\pysha3-0.3.win32-py3.4.exe"
+  ExecWait "$INSTDIR\deps\x86\psutil-4.0.0.win32-py3.4.exe"
+  ExecWait "$INSTDIR\deps\x86\pywin32-220.win32-py3.4.exe"
+SectionEnd
+
+; Install certificates
+Section "redBorder root certificate" sec_cert
+  Push "$INSTDIR\certs\s3.redborder.cluster.crt"
+  Call AddCertificateToStore
+  Pop $0
+  ${If} $0 != success
+  MessageBox MB_OK "import failed: $0"
+  ${EndIf}
+SectionEnd
+
+; Add entries to host
+Section "Add entries to hosts files" sec_host
+  ${FileJoin} "$SYSDIR\drivers\etc\hosts" "$INSTDIR\hosts" "$SYSDIR\drivers\etc\hosts"
+SectionEnd
+
+SectionGroupEnd
 
 Section "Uninstall"
   SetShellVarContext all
