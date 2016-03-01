@@ -64,8 +64,8 @@ Section -SETTINGS
   SetOverwrite ifnewer
 SectionEnd
 
-; Install python
-Section /o "Python ${PY_VERSION}" sec_py
+; Install python core
+Section "Python ${PY_VERSION}" sec_py
   DetailPrint "Installing Python ${PY_MAJOR_VERSION}, ${BITNESS} bit"
   [% if ib.py_version_tuple >= (3, 5) %]
     [% set filename = 'python-' ~ ib.py_version ~ ('-amd64' if ib.py_bitness==64 else '') ~ '.exe' %]
@@ -81,20 +81,14 @@ Section /o "Python ${PY_VERSION}" sec_py
 SectionEnd
 
 ; Install GRR client
-Section /o "GRR Client" sec_grr
+Section "GRR Client" sec_grr
   ExecWait "$INSTDIR\grr\GRR_3.0.0.7_amd64.exe"
 SectionEnd
-
-; ; Install endpoint_agent as a service
-; Section "Install as a services" sec_service
-;   nsExec::Exec "cmd"
-; SectionEnd
 
 SectionGroup "Loader agent" index_output
 
 ; Install endpoint_agent core
 Section "Agent core" sec_app
-  SectionIn RO
   SetShellVarContext all
   File ${PRODUCT_ICON}
   SetOutPath "$INSTDIR\pkgs"
@@ -146,8 +140,6 @@ SectionEnd
 
 ; Install dependences
 Section "Python dependences" sec_pysha
-  SectionIn RO
-
   ExecWait "$INSTDIR\deps\x86\pysha3-0.3.win32-py3.4.exe"
   ExecWait "$INSTDIR\deps\x86\psutil-4.0.0.win32-py3.4.exe"
   ExecWait "$INSTDIR\deps\x86\pywin32-220.win32-py3.4.exe"
@@ -161,11 +153,6 @@ Section "redBorder root certificate" sec_cert
   ${If} $0 != success
   MessageBox MB_OK "import failed: $0"
   ${EndIf}
-SectionEnd
-
-; Add entries to host
-Section "Add entries to hosts files" sec_host
-  ${FileJoin} "$SYSDIR\drivers\etc\hosts" "$INSTDIR\hosts" "$SYSDIR\drivers\etc\hosts"
 SectionEnd
 
 SectionGroupEnd
@@ -259,72 +246,4 @@ Function AddCertificateToStore
   Pop $R0
   Pop $1
   Exch $0
-FunctionEnd
-
-Function FileJoin
-	Exch $2
-	Exch
-	Exch $1
-	Exch
-	Exch 2
-	Exch $0
-	Exch 2
-	Push $3
-	Push $4
-	Push $5
-	ClearErrors
-
-	IfFileExists $0 0 error
-	IfFileExists $1 0 error
-	StrCpy $3 0
-	IntOp $3 $3 - 1
-	StrCpy $4 $2 1 $3
-	StrCmp $4 \ +2
-	StrCmp $4 '' +3 -3
-	StrCpy $4 $2 $3
-	IfFileExists '$4\*.*' 0 error
-
-	StrCmp $2 $0 0 +2
-	StrCpy $2 ''
-	StrCmp $2 '' 0 +3
-	StrCpy $4 $0
-	goto +3
-	GetTempFileName $4
-	CopyFiles /SILENT $0 $4
-	FileOpen $3 $4 a
-	IfErrors error
-	FileSeek $3 -1 END
-	FileRead $3 $5
-	StrCmp $5 '$\r' +3
-	StrCmp $5 '$' +2
-	FileWrite $3 '$\r$'
-
-	;FileWrite $3 '$\r$--Divider--$\r$'
-
-	FileOpen $0 $1 r
-	IfErrors error
-	FileRead $0 $5
-	IfErrors +3
-	FileWrite $3 $5
-	goto -3
-	FileClose $0
-	FileClose $3
-	StrCmp $2 '' end
-	Delete '$EXEDIR\$2'
-	Rename $4 '$EXEDIR\$2'
-	IfErrors 0 end
-	Delete $2
-	Rename $4 $2
-	IfErrors 0 end
-
-	error:
-	SetErrors
-
-	end:
-	Pop $5
-	Pop $4
-	Pop $3
-	Pop $2
-	Pop $1
-	Pop $0
 FunctionEnd
