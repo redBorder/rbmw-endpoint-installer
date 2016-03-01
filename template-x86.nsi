@@ -13,17 +13,10 @@
 !define CERT_STORE_OPEN_EXISTING_FLAG 0x4000
 !define CERT_SYSTEM_STORE_LOCAL_MACHINE 0x20000
 !define CERT_STORE_ADD_ALWAYS 4
+!define LVM_GETITEMCOUNT 0x1004
+!define LVM_GETITEMTEXT 0x102D
 
-;;;;;;;;;;;;;;;;
-; Define macros
-;;;;;;;;;;;;;;;;
-!define FileJoin `!insertmacro FileJoinCall`
-!macro FileJoinCall _FILE1 _FILE2 _FILE3
-  Push `${_FILE1}`
-  Push `${_FILE2}`
-  Push `${_FILE3}`
-  Call FileJoin
-!macroend
+!include "TextLog.nsh"
 
 ;;;;;;;;;;;;;;;;
 ; Set installer options
@@ -62,11 +55,15 @@ ShowInstDetails show
 Section -SETTINGS
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
+  ${LogSetFileName} "$INSTDIR\InstallLog.txt"
+  ${LogSetOn}
 SectionEnd
 
 ; Install python core
 Section "Python ${PY_VERSION}" sec_py
+  ClearErrors
   DetailPrint "Installing Python ${PY_MAJOR_VERSION}, ${BITNESS} bit"
+  ${LogText} "Installing Python ${PY_MAJOR_VERSION}, ${BITNESS} bit"
   [% if ib.py_version_tuple >= (3, 5) %]
     [% set filename = 'python-' ~ ib.py_version ~ ('-amd64' if ib.py_bitness==64 else '') ~ '.exe' %]
     File "[[filename]]"
@@ -78,15 +75,25 @@ Section "Python ${PY_VERSION}" sec_py
             /qb ALLUSERS=1 TARGETDIR="$COMMONFILES${BITNESS}\Python\${PY_MAJOR_VERSION}"'
   [% endif %]
   Delete "$INSTDIR\[[filename]]"
+
+  IfErrors 0 noerror
+    ${LogText} "Error installing Python"
+  noerror:
 SectionEnd
 
 ; Install GRR client
 Section "GRR Client" sec_grr
+  ClearErrors
+  ${LogText} "Installing GRR_3.0.0.7_i386.exe"
   ExecWait "$INSTDIR\x86\GRR_3.0.0.7_i386.exe"
+
+  IfErrors 0 noerror
+    ${LogText} "Error installing GRR_3.0.0.7_i386.exe"
+  noerror:
 SectionEnd
 
-SectionGroup "Loader agent" index_output
-  Section "Core" sec_core
+; Install endpoint_agent core
+Section "Agent core" sec_app
   SetShellVarContext all
   File ${PRODUCT_ICON}
   SetOutPath "$INSTDIR\pkgs"
@@ -101,16 +108,35 @@ SectionGroup "Loader agent" index_output
     [% endfor %]
   [% endfor %]
 
+  IfErrors 0 noerror1
+    ${LogText} "Error installing loader agent files"
+  noerror1:
+
+  ClearErrors
+
   ; Install directories
   [% for dir, destination in ib.install_dirs %]
     SetOutPath "[[ pjoin(destination, dir) ]]"
     File /r "[[dir]]\*.*"
   [% endfor %]
 
+  IfErrors 0 noerror2
+    ${LogText} "Error installing loader agent directories"
+  noerror2:
+
+  ClearErrors
+
   ; Byte-compile Python files.
+  ${LogText} "Byte-compiling Python modules..."
   DetailPrint "Byte-compiling Python modules..."
   nsExec::ExecToLog '[[ python ]] -m compileall -q "$INSTDIR\pkgs"'
   WriteUninstaller $INSTDIR\uninstall.exe
+
+  IfErrors 0 noerror3
+    ${LogText} "Error byte compiling apps"
+  noerror3:
+
+  ClearErrors
 
   ; Add ourselves to Add/remove programs
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" \
@@ -126,41 +152,46 @@ SectionGroup "Loader agent" index_output
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" \
                    "NoRepair" 1
 
+  IfErrors 0 noerror4
+  ${LogText} "Error adding keys to registry"
+  noerror4:
+
+  ClearErrors
+
   ExecWait "$INSTDIR\postinstall.bat"
 
-  ; Check if we need to reboot
-  IfRebootFlag 0 noreboot
-    MessageBox MB_YESNO "A reboot is required to finish the installation. Do you wish to reboot now?" \
-                /SD IDNO IDNO noreboot
-      Reboot
-  noreboot:
+  IfErrors 0 noerror5
+   ${LogText} "Error executing postinstall"
+  noerror5:
 SectionEnd
 
 ; Install dependences
-Section "Python dependences" sec_pysha
+Section "Python dependencies" sec_deps
+  ClearErrors
+
   ExecWait "$INSTDIR\x86\pysha3-0.3.win32-py3.4.exe"
   ExecWait "$INSTDIR\x86\psutil-4.0.0.win32-py3.4.exe"
   ExecWait "$INSTDIR\x86\pywin32-220.win32-py3.4.exe"
+
+  IfErrors 0 noerror
+    ${LogText} "Error installing dependencies"
+  noerror:
 SectionEnd
 
 ; Install config
 Section "Configuration" sec_config
   ClearErrors
+
   CopyFiles "$EXEDIR\hosts" "$INSTDIR\hosts"
-  IfErrors 0 +2
-    MessageBox MB_OK "Fail to install hosts files"
-
-  ClearErrors
   CopyFiles "$EXEDIR\s3.redborder.cluster.crt" "$INSTDIR\cert\s3.redborder.cluster.crt"
-  IfErrors 0 +2
-    MessageBox MB_OK "Fail to install certificate"
-
-  ClearErrors
   CopyFiles "$EXEDIR\parameters.yaml" "$INSTDIR\config\parameters.yaml"
-  IfErrors 0 +2
-    MessageBox MB_OK "Fail to install parameters.yml file"
+
+  IfErrors 0 noerror
+    ${LogText} "Error installing configuration files"
+  noerror:
+
+  ${LogSetOff}
 SectionEnd
-SectionGroupEnd
 
 Section "Uninstall"
   SetShellVarContext all
@@ -176,6 +207,7 @@ Section "Uninstall"
   Delete "$INSTDIR\hosts"
   Delete "$INSTDIR\config\parameters.yaml"
   Delete "$INSTDIR\s3.redborder.cluster.crt"
+  Delete "$INSTDIR\InstallLog.txt"
 
   ; Uninstall directories
   [% for dir, destination in ib.install_dirs %]
@@ -216,7 +248,7 @@ Function .onMouseOverSection
     StrCmp $0 ${sec_py} 0 +2
       SendMessage $R0 ${WM_SETTEXT} 0 "STR:The Python interpreter. \
       This is required for ${PRODUCT_NAME} to run."
-    StrCmp $0 ${sec_core} "" +2
+    StrCmp $0 ${sec_app} "" +2
       SendMessage $R0 ${WM_SETTEXT} 0 "STR:${PRODUCT_NAME}"
 
     [% endblock mouseover_messages %]
