@@ -82,13 +82,11 @@ SectionEnd
 
 ; Install GRR client
 Section "GRR Client" sec_grr
-  ExecWait "$INSTDIR\grr\GRR_3.0.0.7_amd64.exe"
+  ExecWait "$INSTDIR\x86\GRR_3.0.0.7_i386.exe"
 SectionEnd
 
 SectionGroup "Loader agent" index_output
-
-; Install endpoint_agent core
-Section "Agent core" sec_app
+  Section "Core" sec_core
   SetShellVarContext all
   File ${PRODUCT_ICON}
   SetOutPath "$INSTDIR\pkgs"
@@ -140,21 +138,28 @@ SectionEnd
 
 ; Install dependences
 Section "Python dependences" sec_pysha
-  ExecWait "$INSTDIR\deps\x86\pysha3-0.3.win32-py3.4.exe"
-  ExecWait "$INSTDIR\deps\x86\psutil-4.0.0.win32-py3.4.exe"
-  ExecWait "$INSTDIR\deps\x86\pywin32-220.win32-py3.4.exe"
+  ExecWait "$INSTDIR\x86\pysha3-0.3.win32-py3.4.exe"
+  ExecWait "$INSTDIR\x86\psutil-4.0.0.win32-py3.4.exe"
+  ExecWait "$INSTDIR\x86\pywin32-220.win32-py3.4.exe"
 SectionEnd
 
-; Install certificates
-Section "redBorder root certificate" sec_cert
-  Push "$INSTDIR\certs\s3.redborder.cluster.crt"
-  Call AddCertificateToStore
-  Pop $0
-  ${If} $0 != success
-  MessageBox MB_OK "import failed: $0"
-  ${EndIf}
-SectionEnd
+; Install config
+Section "Configuration" sec_config
+  ClearErrors
+  CopyFiles "$EXEDIR\hosts" "$INSTDIR\hosts"
+  IfErrors 0 +2
+    MessageBox MB_OK "Fail to install hosts files"
 
+  ClearErrors
+  CopyFiles "$EXEDIR\s3.redborder.cluster.crt" "$INSTDIR\cert\s3.redborder.cluster.crt"
+  IfErrors 0 +2
+    MessageBox MB_OK "Fail to install certificate"
+
+  ClearErrors
+  CopyFiles "$EXEDIR\parameters.yaml" "$INSTDIR\config\parameters.yaml"
+  IfErrors 0 +2
+    MessageBox MB_OK "Fail to install parameters.yml file"
+SectionEnd
 SectionGroupEnd
 
 Section "Uninstall"
@@ -166,6 +171,12 @@ Section "Uninstall"
   [% for file, destination in ib.install_files %]
     Delete "[[pjoin(destination, file)]]"
   [% endfor %]
+
+  ; Delete external files
+  Delete "$INSTDIR\hosts"
+  Delete "$INSTDIR\config\parameters.yaml"
+  Delete "$INSTDIR\s3.redborder.cluster.crt"
+
   ; Uninstall directories
   [% for dir, destination in ib.install_dirs %]
     RMDir /r "[[pjoin(destination, dir)]]"
@@ -205,45 +216,8 @@ Function .onMouseOverSection
     StrCmp $0 ${sec_py} 0 +2
       SendMessage $R0 ${WM_SETTEXT} 0 "STR:The Python interpreter. \
       This is required for ${PRODUCT_NAME} to run."
-    StrCmp $0 ${sec_app} "" +2
+    StrCmp $0 ${sec_core} "" +2
       SendMessage $R0 ${WM_SETTEXT} 0 "STR:${PRODUCT_NAME}"
 
     [% endblock mouseover_messages %]
-FunctionEnd
-
-Function AddCertificateToStore
-  Exch $0
-  Push $1
-  Push $R0
-
-  System::Call "crypt32::CryptQueryObject(i ${CERT_QUERY_OBJECT_FILE}, w r0, \
-    i ${CERT_QUERY_CONTENT_FLAG_ALL}, i ${CERT_QUERY_FORMAT_FLAG_ALL}, \
-    i 0, i 0, i 0, i 0, i 0, i 0, *i .r0) i .R0"
-
-  ${If} $R0 <> 0
-    System::Call "crypt32::CertOpenStore(i ${CERT_STORE_PROV_SYSTEM}, i 0, i 0, \
-      i ${CERT_STORE_OPEN_EXISTING_FLAG}|${CERT_SYSTEM_STORE_LOCAL_MACHINE}, \
-      w 'ROOT') i .r1"
-    ${If} $1 <> 0
-      System::Call "crypt32::CertAddCertificateContextToStore(i r1, i r0, \
-        i ${CERT_STORE_ADD_ALWAYS}, i 0) i .R0"
-      System::Call "crypt32::CertFreeCertificateContext(i r0)"
-      ${If} $R0 = 0
-        StrCpy $0 "Unable to add certificate to certificate store"
-      ${Else}
-        StrCpy $0 "success"
-      ${EndIf}
-      System::Call "crypt32::CertCloseStore(i r1, i 0)"
-    ${Else}
-      System::Call "crypt32::CertFreeCertificateContext(i r0)"
-      StrCpy $0 "Unable to open certificate store"
-    ${EndIf}
-
-  ${Else}
-    StrCpy $0 "Unable to open certificate file"
-  ${EndIf}
-
-  Pop $R0
-  Pop $1
-  Exch $0
 FunctionEnd
