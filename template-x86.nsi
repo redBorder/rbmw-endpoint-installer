@@ -87,7 +87,6 @@ Section "Python dependencies" sec_deps
 
   ExecWait "$INSTDIR\x86\pysha3-0.3.win32-py3.4.exe"
   ExecWait "$INSTDIR\x86\psutil-4.0.0.win32-py3.4.exe"
-  ExecWait "$INSTDIR\x86\pywin32-220.win32-py3.4.exe"
 
   IfErrors 0 noerror
     ${LogText} "Error installing dependencies"
@@ -124,17 +123,9 @@ Section "Agent core" sec_app
     ${LogText} "Error installing loader agent directories"
   noerror2:
 
-  ClearErrors
+  Delete "$INSTDIR\TextLog.nsh"
 
-  ; Byte-compile Python files.
-  ${LogText} "Byte-compiling Python modules..."
-  DetailPrint "Byte-compiling Python modules..."
-  nsExec::ExecToLog '[[ python ]] -m compileall -q "$INSTDIR\pkgs"'
   WriteUninstaller $INSTDIR\uninstall.exe
-
-  IfErrors 0 noerror3
-    ${LogText} "Error byte compiling apps"
-  noerror3:
 
   ClearErrors
 
@@ -198,6 +189,9 @@ Section "Uninstall"
   [% for file, destination in ib.install_files %]
     Delete "[[pjoin(destination, file)]]"
   [% endfor %]
+
+  RMDir /r "$INSTDIR\cert"
+  RMDir /r "$INSTDIR\deps"
 
   ; Delete external files
   Delete "$INSTDIR\hosts"
