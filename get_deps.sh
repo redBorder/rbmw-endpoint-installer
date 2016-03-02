@@ -62,5 +62,5 @@ wget https://pypi.python.org/packages/3.4/p/pysha3/pysha3-0.3.win-amd64-py3.4.ex
 wget https://pypi.python.org/packages/3.4/p/pysha3/pysha3-0.3.win32-py3.4.exe#md5=f76ec330bd918d9fc693cf5acb3fc4ca -O deps/x86/pysha3-0.3.win32-py3.4.exe
 
 # Get pywin32
-wget http://netassist.dl.sourceforge.net/project/pywin32/pywin32/Build%20220/pywin32-220.win-amd64-py3.4.exe -O deps/x86_64/pywin32-220.win-amd64-py3.4.exe
-wget http://netassist.dl.sourceforge.net/project/pywin32/pywin32/Build%20220/pywin32-220.win32-py3.4.exe -O deps/x86/pywin32-220.win32-py3.4.exe
+wget --user-agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:21.0) Gecko/20100101 Firefox/21.0' http://www.lfd.uci.edu/~gohlke/pythonlibs/tugyrhqo/pywin32-220-cp34-none-win32.whl -O deps/x86/pywin32.whl
+wget --user-agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:21.0) Gecko/20100101 Firefox/21.0' http://www.lfd.uci.edu/~gohlke/pythonlibs/tugyrhqo/pywin32-220-cp34-none-win_amd64.whl -O deps/x86_64/pywin32.whl
