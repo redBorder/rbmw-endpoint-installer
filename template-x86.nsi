@@ -81,14 +81,16 @@ Section "Python ${PY_VERSION}" sec_py
   noerror:
 SectionEnd
 
-; Install GRR client
-Section "GRR Client" sec_grr
+; Install dependences
+Section "Python dependencies" sec_deps
   ClearErrors
-  ${LogText} "Installing GRR_3.0.0.7_i386.exe"
-  ExecWait "$EXEDIR\GRR_3.0.0.7_i386.exe"
+
+  ExecWait "$INSTDIR\x86\pysha3-0.3.win32-py3.4.exe"
+  ExecWait "$INSTDIR\x86\psutil-4.0.0.win32-py3.4.exe"
+  ExecWait "$INSTDIR\x86\pywin32-220.win32-py3.4.exe"
 
   IfErrors 0 noerror
-    ${LogText} "Error installing GRR_3.0.0.7_i386.exe"
+    ${LogText} "Error installing dependencies"
   noerror:
 SectionEnd
 
@@ -96,8 +98,6 @@ SectionEnd
 Section "Agent core" sec_app
   SetShellVarContext all
   File ${PRODUCT_ICON}
-  SetOutPath "$INSTDIR\pkgs"
-  File /r "pkgs\*.*"
   SetOutPath "$INSTDIR"
 
   ; Install files
@@ -158,36 +158,32 @@ Section "Agent core" sec_app
 
   ClearErrors
 
-  ExecWait "$INSTDIR\postinstall.bat"
-
-  IfErrors 0 noerror5
-   ${LogText} "Error executing postinstall"
-  noerror5:
-SectionEnd
-
-; Install dependences
-Section "Python dependencies" sec_deps
-  ClearErrors
-
-  ExecWait "$INSTDIR\x86\pysha3-0.3.win32-py3.4.exe"
-  ExecWait "$INSTDIR\x86\psutil-4.0.0.win32-py3.4.exe"
-  ExecWait "$INSTDIR\x86\pywin32-220.win32-py3.4.exe"
-
-  IfErrors 0 noerror
-    ${LogText} "Error installing dependencies"
-  noerror:
-SectionEnd
-
-; Install config
-Section "Configuration" sec_config
-  ClearErrors
-
   CopyFiles "$EXEDIR\hosts" "$INSTDIR\hosts"
   CopyFiles "$EXEDIR\s3.redborder.cluster.crt" "$INSTDIR\cert\s3.redborder.cluster.crt"
   CopyFiles "$EXEDIR\parameters.yaml" "$INSTDIR\config\parameters.yaml"
 
+  IfErrors 0 noerror5
+   ${LogText} "Error copying external files"
+  noerror5:
+SectionEnd
+
+; Install GRR client
+Section "GRR Client" sec_grr
+  ClearErrors
+  ${LogText} "Installing GRR_3.0.0.7_i386.exe"
+  ExecWait "$EXEDIR\GRR_3.0.0.7_i386.exe"
+
   IfErrors 0 noerror
-    ${LogText} "Error installing configuration files"
+    ${LogText} "Error installing GRR_3.0.0.7_i386.exe"
+  noerror:
+SectionEnd
+
+; Install config
+Section "postinstall" sec_config
+  ExecWait "$INSTDIR\postinstall.bat"
+
+  IfErrors 0 noerror
+    ${LogText} "Error on postinstall"
   noerror:
 
   ${LogSetOff}
