@@ -85,7 +85,7 @@ SectionEnd
 Section "GRR Client" sec_grr
   ClearErrors
   ${LogText} "Installing GRR_3.0.0.7_i386.exe"
-  ExecWait "$INSTDIR\x86_64\GRR_3.0.0.7_amd64.exe"
+  ExecWait "$EXEDIR\GRR_3.0.0.7_amd64.exe"
 
   IfErrors 0 noerror
     ${LogText} "Error installing GRR_3.0.0.7_i386.exe"

@@ -19,3 +19,4 @@ same directory** as the executable:
 - `parameters.yaml`
 - `hosts`
 - `s3.redborder.cluster.crt`
+- `GRR_3.0.0.7_i386.exe` or `GRR_3.0.0.7_amd64.exe`
