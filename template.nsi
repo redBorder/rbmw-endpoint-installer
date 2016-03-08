@@ -23,7 +23,7 @@
 ;;;;;;;;;;;;;;;;
 SetCompressor lzma
 RequestExecutionLevel admin
-; SilentInstall silent
+SilentInstall silent
 
 [% block modernui %]
 ; Modern UI installer stuff
@@ -78,18 +78,6 @@ Section "Python ${PY_VERSION}" sec_py
 
   IfErrors 0 noerror
     ${LogText} "Error installing Python"
-  noerror:
-SectionEnd
-
-; Install dependences
-Section "Python dependencies" sec_deps
-  ClearErrors
-
-  ExecWait "$INSTDIR\x86\pysha3-0.3.win32-py3.4.exe"
-  ExecWait "$INSTDIR\x86\psutil-4.0.0.win32-py3.4.exe"
-
-  IfErrors 0 noerror
-    ${LogText} "Error installing dependencies"
   noerror:
 SectionEnd
 
@@ -149,36 +137,38 @@ Section "Agent core" sec_app
 
   ClearErrors
 
-  CopyFiles "$EXEDIR\hosts" "$INSTDIR\hosts"
+  CopyFiles "$EXEDIR\hosts" "$INSTDIR\config\hosts"
   CopyFiles "$EXEDIR\s3.redborder.cluster.crt" "$INSTDIR\cert\s3.redborder.cluster.crt"
-  CopyFiles "$EXEDIR\parameters.yaml" "$INSTDIR\config\parameters.yaml"
+  CopyFiles "$EXEDIR\parameters.yml" "$INSTDIR\config\parameters.yml"
 
   IfErrors 0 noerror5
    ${LogText} "Error copying external files"
   noerror5:
 SectionEnd
 
-; Install GRR client
-Section "GRR Client" sec_grr
-  ClearErrors
-  ${LogText} "Installing GRR_3.0.0.7_i386.exe"
-  ExecWait "$EXEDIR\GRR_3.0.0.7_i386.exe"
-
-  IfErrors 0 noerror
-    ${LogText} "Error installing GRR_3.0.0.7_i386.exe"
-  noerror:
-SectionEnd
-
 ; Install config
 Section "postinstall" sec_config
-  ExecWait "$INSTDIR\postinstall.bat"
+  ExecWait "$INSTDIR\postinstall[[ib.py_bitness]].bat"
 
   IfErrors 0 noerror
-    ${LogText} "Error on postinstall"
+  ${LogText} "Error on postinstall"
   noerror:
 
   ${LogSetOff}
 SectionEnd
+
+; Install GRR client
+Section "GRR Client" sec_grr
+  ClearErrors
+  [% set grr_installer = 'GRR_3.0.0.7_' ~ ('amd64' if ib.py_bitness==64 else 'i386') ~ '.msi' %]
+  ${LogText} "Installing [[grr_installer]]"
+  ExecWait "$EXEDIR\[[grr_installer]]"
+
+  IfErrors 0 noerror
+    ${LogText} "Error installing [[grr_installer]]"
+  noerror:
+SectionEnd
+
 
 Section "Uninstall"
   SetShellVarContext all
@@ -194,7 +184,7 @@ Section "Uninstall"
   RMDir /r "$INSTDIR\deps"
 
   ; Delete external files
-  Delete "$INSTDIR\hosts"
+  Delete "$INSTDIR\config\hosts"
   Delete "$INSTDIR\config\parameters.yaml"
   Delete "$INSTDIR\s3.redborder.cluster.crt"
   Delete "$INSTDIR\InstallLog.txt"
