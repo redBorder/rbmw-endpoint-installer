@@ -54,13 +54,13 @@ mv six-1.10.0/six.py endpoint-loader-agent/endpoint_agent/lib/
 rm -rf six-1.10.0
 
 # Get psutil
-wget https://pypi.python.org/packages/3.4/p/psutil/psutil-4.0.0.win-amd64-py3.4.exe#md5=baa1f3e1bd4fc5b0dd4823fe7c7cbf1c -O deps/x86_64/psutil-4.0.0.win-amd64-py3.4.exe
-wget https://pypi.python.org/packages/3.4/p/psutil/psutil-4.0.0.win32-py3.4.exe#md5=baa1f3e1bd4fc5b0dd4823fe7c7cbf1c -O deps/x86/psutil-4.0.0.win32-py3.4.exe
+wget https://pypi.python.org/packages/3.4/p/psutil/psutil-4.0.0-cp34-cp34m-win32.whl -O deps/x86/psutil-4.0.0-cp34-cp34m-win32.whl
+wget https://pypi.python.org/packages/3.4/p/psutil/psutil-4.0.0-cp34-cp34m-win_amd64.whl -O deps/x86_64/psutil-4.0.0-cp34-cp34m-win_amd64.whl
 
 # Get pysha3
-wget https://pypi.python.org/packages/3.4/p/pysha3/pysha3-0.3.win-amd64-py3.4.exe#md5=f76ec330bd918d9fc693cf5acb3fc4ca -O deps/x86_64/pysha3-0.3.win-amd64-py3.4.exe
-wget https://pypi.python.org/packages/3.4/p/pysha3/pysha3-0.3.win32-py3.4.exe#md5=f76ec330bd918d9fc693cf5acb3fc4ca -O deps/x86/pysha3-0.3.win32-py3.4.exe
+wget https://pypi.python.org/packages/3.4/p/pysha3/pysha3-0.3-cp34-none-win32.whl -O deps/x86/pysha3-0.3-cp34-none-win32.whl
+wget https://pypi.python.org/packages/3.4/p/pysha3/pysha3-0.3-cp34-none-win_amd64.whl -O deps/x86_64/pysha3-0.3-cp34-none-win_amd64.whl
 
 # Get pywin32
-wget --user-agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:21.0) Gecko/20100101 Firefox/21.0' http://www.lfd.uci.edu/~gohlke/pythonlibs/tugyrhqo/pywin32-220-cp34-none-win32.whl -O deps/x86/pywin32.whl
-wget --user-agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:21.0) Gecko/20100101 Firefox/21.0' http://www.lfd.uci.edu/~gohlke/pythonlibs/tugyrhqo/pywin32-220-cp34-none-win_amd64.whl -O deps/x86_64/pywin32.whl
+# wget --user-agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:21.0) Gecko/20100101 Firefox/21.0' http://www.lfd.uci.edu/~gohlke/pythonlibs/djcobkfp/pywin32-220-cp34-none-win32.whl -O deps/x86/pywin32-220-cp34-none-win32.whl
+# wget --user-agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:21.0) Gecko/20100101 Firefox/21.0' http://www.lfd.uci.edu/~gohlke/pythonlibs/djcobkfp/pywin32-220-cp34-none-win_amd64.whl -O deps/x86_64/pywin32-220-cp34-none-win_amd64.whl
