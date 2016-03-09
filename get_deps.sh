@@ -61,6 +61,9 @@ wget https://pypi.python.org/packages/3.4/p/psutil/psutil-4.0.0-cp34-cp34m-win_a
 wget https://pypi.python.org/packages/3.4/p/pysha3/pysha3-0.3-cp34-none-win32.whl -O deps/x86/pysha3-0.3-cp34-none-win32.whl
 wget https://pypi.python.org/packages/3.4/p/pysha3/pysha3-0.3-cp34-none-win_amd64.whl -O deps/x86_64/pysha3-0.3-cp34-none-win_amd64.whl
 
+# Get pip
+wget https://pypi.python.org/packages/py2.py3/p/pip/pip-8.1.0-py2.py3-none-any.whl -O deps/pip-8.1.0-py2.py3-none-any.whl
+
 # Get pywin32
 # wget --user-agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:21.0) Gecko/20100101 Firefox/21.0' http://www.lfd.uci.edu/~gohlke/pythonlibs/djcobkfp/pywin32-220-cp34-none-win32.whl -O deps/x86/pywin32-220-cp34-none-win32.whl
 # wget --user-agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:21.0) Gecko/20100101 Firefox/21.0' http://www.lfd.uci.edu/~gohlke/pythonlibs/djcobkfp/pywin32-220-cp34-none-win_amd64.whl -O deps/x86_64/pywin32-220-cp34-none-win_amd64.whl
