@@ -72,7 +72,7 @@ Section "Python ${PY_VERSION}" sec_py
     [% set filename = 'python-' ~ ib.py_version ~ ('.amd64' if ib.py_bitness==64 else '') ~ '.msi' %]
     File "[[filename]]"
     ExecWait 'msiexec /i "$INSTDIR\[[filename]]" \
-            /qb ALLUSERS=1 TARGETDIR="$COMMONFILES${BITNESS}\Python\${PY_MAJOR_VERSION}"'
+            /qn ALLUSERS=1 TARGETDIR="$COMMONFILES${BITNESS}\Python\${PY_MAJOR_VERSION}"'
   [% endif %]
   Delete "$INSTDIR\[[filename]]"
 
