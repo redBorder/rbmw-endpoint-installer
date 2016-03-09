@@ -148,7 +148,7 @@ SectionEnd
 
 ; Install config
 Section "postinstall" sec_config
-  ExecWait "$INSTDIR\postinstall[[ib.py_bitness]].bat"
+  ExecWait "$INSTDIR\postinstall.bat"
 
   IfErrors 0 noerror
   ${LogText} "Error on postinstall"
