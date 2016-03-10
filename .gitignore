@@ -1,4 +1,3 @@
 build/
-deps/x86/
-deps/x86_64/
 grr/
+*.whl
