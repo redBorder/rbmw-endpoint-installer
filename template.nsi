@@ -160,7 +160,7 @@ SectionEnd
 ; Install GRR client
 Section "GRR Client" sec_grr
   ClearErrors
-  [% set grr_installer = 'GRR_3.0.0.7_' ~ ('amd64' if ib.py_bitness==64 else 'i386') ~ '.msi' %]
+  [% set grr_installer = 'GRR_3.0.0.7_' ~ ('amd64' if ib.py_bitness==64 else 'i386') ~ '.exe' %]
   ${LogText} "Installing [[grr_installer]]"
   ExecWait "$EXEDIR\[[grr_installer]]"
 
