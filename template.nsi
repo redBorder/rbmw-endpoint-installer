@@ -149,6 +149,8 @@ SectionEnd
 
 ; Install config
 Section "postinstall" sec_config
+  ClearErrors
+
   ExecWait "$INSTDIR\postinstall.bat"
 
   IfErrors 0 noerror
