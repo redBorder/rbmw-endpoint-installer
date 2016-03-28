@@ -138,8 +138,9 @@ Section "Agent core" sec_app
   ClearErrors
 
   CopyFiles "$EXEDIR\hosts" "$INSTDIR\config\hosts"
-  CopyFiles "$EXEDIR\s3.redborder.cluster.crt" "$INSTDIR\cert\s3.redborder.cluster.crt"
+  #CopyFiles "$EXEDIR\s3.redborder.cluster.crt" "$INSTDIR\cert\s3.redborder.cluster.crt"
   CopyFiles "$EXEDIR\parameters.yml" "$INSTDIR\config\parameters.yml"
+  CopyFiles "$EXEDIR\file_filters.yml" "$INSTDIR\endpoint_agent\filters\file_filters.yml"
 
   IfErrors 0 noerror5
    ${LogText} "Error copying external files"
@@ -180,7 +181,7 @@ Section "Uninstall"
     Delete "[[pjoin(destination, file)]]"
   [% endfor %]
 
-  RMDir /r "$INSTDIR\cert"
+  #RMDir /r "$INSTDIR\cert"
   RMDir /r "$INSTDIR\deps"
 
   ; Delete external files
