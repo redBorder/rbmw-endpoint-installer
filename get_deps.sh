@@ -5,15 +5,39 @@ mkdir -p endpoint-loader-agent/endpoint_agent/lib
 mkdir -p deps/x86
 mkdir -p deps/x86_64
 
-# Install boto
-wget https://pypi.python.org/packages/source/b/boto/boto-2.39.0.tar.gz#md5=503e6ffd7d56dcdffa38cb316bb119e9
-tar xvzf boto-2.39.0.tar.gz
-rm -f boto-2.39.0.tar.gz
-rm -rf endpoint-loader-agent/endpoint_agent/lib/boto
-mv boto-2.39.0/boto endpoint-loader-agent/endpoint_agent/lib/
-rm -rf boto-2.39.0
+# Install botocore
+wget https://pypi.python.org/packages/source/b/botocore/botocore-1.4.5.tar.gz#md5=8ada0254ab3f080a0a7f5035c958403c
+tar xvzf botocore-1.4.5.tar.gz
+rm -f botocore-1.4.5.tar.gz
+rm -rf endpoint-loader-agent/endpoint_agent/lib/botocore
+mv botocore-1.4.5/botocore endpoint-loader-agent/endpoint_agent/lib/
+rm -rf botocore-1.4.5
 
-# # Install request
+# Install boto3
+wget https://pypi.python.org/packages/source/b/boto3/boto3-1.3.0.tar.gz#md5=b5a6cc7dc0e0c0969944f65db7f7b07f
+tar xvzf boto3-1.3.0.tar.gz
+rm -f boto3-1.3.0.tar.gz
+rm -rf endpoint-loader-agent/endpoint_agent/lib/boto3
+mv boto3-1.3.0/boto3 endpoint-loader-agent/endpoint_agent/lib/
+rm -rf boto3-1.3.0
+
+# Install dateutil
+wget https://pypi.python.org/packages/source/p/python-dateutil/python-dateutil-2.5.1.tar.gz#md5=2769f13c596427558136b34977a95269
+tar xvzf python-dateutil-2.5.1.tar.gz
+rm -f python-dateutil-2.5.1.tar.gz
+rm -rf endpoint-loader-agent/endpoint_agent/lib/dateutil
+mv python-dateutil-2.5.1/dateutil endpoint-loader-agent/endpoint_agent/lib
+rm -rf python-dateutil-2.5.1
+
+# Install jmespath
+wget https://pypi.python.org/packages/source/j/jmespath/jmespath-0.9.0.tar.gz#md5=471b7d19bd153ac11a21d4fb7466800c
+tar xvzf jmespath-0.9.0.tar.gz
+rm -f jmespath-0.9.0.tar.gz
+rm -rf endpoint-loader-agent/endpoint_agent/lib/jmespath
+mv jmespath-0.9.0/jmespath endpoint-loader-agent/endpoint_agent/lib
+rm -rf jmespath-0.9.0
+
+# Install request
 wget https://pypi.python.org/packages/source/r/requests/requests-2.9.1.tar.gz#md5=0b7f480d19012ec52bab78292efd976d
 tar xvzf requests-2.9.1.tar.gz
 rm -f requests-2.9.1.tar.gz
