@@ -1,0 +1,3 @@
+[submodule "endpoint-loader-agent"]
+	path = endpoint-loader-agent
+	url = git@gitlab.redborder.lan:core-developers/endpoint-loader-agent.git
